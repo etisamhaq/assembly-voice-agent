@@ -133,12 +133,25 @@ async def test_audit_log_is_redacted_and_complete(engine, tmp_path):
             assert line["role"] in {"advisor", "client", "spouse"}
 
 
+class _AlwaysOn:
+    """Minimal backend stand-in - enabled, never called."""
+
+    name = "stub"
+    model = "stub-model"
+    enabled = True
+
+    async def complete(self, **_):
+        raise AssertionError("StubJudge overrides review(); complete() should not run")
+
+    async def structured(self, **_):
+        raise AssertionError("StubJudge overrides review(); structured() should not run")
+
+
 class StubJudge(LLMJudge):
     """Tier 2 stand-in: finds one thing the regexes structurally cannot."""
 
     def __init__(self, delay=0.0):
-        super().__init__()
-        self._client = object()      # marks it enabled
+        super().__init__(_AlwaysOn())
         self.delay = delay
         self.calls = 0
 
@@ -191,3 +204,33 @@ async def test_judge_failure_does_not_break_the_call(rules):
     p = build(ComplianceEngine(rules, Exploding()), rec)
     summary = await p.run(SimulatedSource(speed=0))
     assert summary["turns"] == 20          # call completed anyway
+
+
+async def test_escalation_latency_is_measured_monotonically(rules):
+    """Turn timestamps run on a simulated call clock, not wall clock.
+
+    Mixing the two made late findings report a latency of ~57 years.
+    """
+    rec = Recorder()
+    p = build(ComplianceEngine(rules, StubJudge(delay=0.05)), rec)
+    await p.run(SimulatedSource(speed=0))
+
+    late = [w for w in rec.of("whisper") if w["rule_id"] == "omitted-risk-disclosure"]
+    assert late
+    for w in late:
+        assert 0 <= w["latency_ms"] < 60_000, f"implausible latency {w['latency_ms']}ms"
+
+
+async def test_slow_tier2_findings_are_not_fast_path_budget_misses(rules):
+    """Tier 2 is detached by design; only tier 1 answers to the budget."""
+    rec = Recorder()
+    p = build(ComplianceEngine(rules, StubJudge(delay=1.4)), rec)   # deliberately over budget
+    summary = await p.run(SimulatedSource(speed=0))
+
+    tier2 = [w for w in rec.of("whisper") if w["tier"] == 2]
+    tier1 = [w for w in rec.of("whisper") if w["tier"] == 1]
+    assert tier2, "the stub judge should have produced a late finding"
+    assert any(w["latency_ms"] > p.whisper_budget_ms for w in tier2)
+    assert all(not w["over_budget"] for w in tier2)
+    assert all(w["latency_ms"] <= p.whisper_budget_ms for w in tier1)
+    assert summary["budget_misses"] == 0
