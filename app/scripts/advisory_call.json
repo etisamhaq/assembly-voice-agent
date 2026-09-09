@@ -1,0 +1,31 @@
+{
+  "title": "401(k) rollover review - Okafor household",
+  "description": "A three-party advisory call. The advisor is competent but drifts into four separate compliance problems, the client reads out an SSN, and the spouse disengages after minute one.",
+  "speakers": {
+    "SPEAKER_A": {"role": "advisor", "name": "Marcus Reed"},
+    "SPEAKER_B": {"role": "client", "name": "Dana Okafor"},
+    "SPEAKER_C": {"role": "spouse", "name": "Sam Okafor"}
+  },
+  "turns": [
+    {"at": 0, "speaker": "SPEAKER_A", "text": "Thanks for making the time, Dana, Sam. I know we are here to talk about moving the four oh one k from your old employer."},
+    {"at": 9000, "speaker": "SPEAKER_B", "text": "Right. It has been sitting there for two years and I do not think it is doing anything."},
+    {"at": 17000, "speaker": "SPEAKER_A", "text": "It is doing something, just not much. Before we go further I need to confirm a couple of details. Can you read me your social?"},
+    {"at": 27000, "speaker": "SPEAKER_B", "text": "Sure, it is 412-99-8765.", "beat": "pii"},
+    {"at": 33000, "speaker": "SPEAKER_A", "text": "Got it. So the rollover target I would put you in is guaranteed to return eight percent a year, which over seven years is real money.", "beat": "critical"},
+    {"at": 45000, "speaker": "SPEAKER_C", "text": "Eight percent guaranteed? That sounds high to me. What happens if the market drops?"},
+    {"at": 54000, "speaker": "SPEAKER_A", "text": "Markets go up and down but this one you cannot lose on.", "beat": "critical"},
+    {"at": 61000, "speaker": "SPEAKER_B", "text": "And what does it cost us to move it?"},
+    {"at": 66000, "speaker": "SPEAKER_A", "text": "There are no fees on the rollover itself.", "beat": "warning"},
+    {"at": 73000, "speaker": "SPEAKER_A", "text": "Second Chair, what is their current allocation?", "beat": "room"},
+    {"at": 83000, "speaker": "SPEAKER_A", "text": "Right, so we are twelve points heavy on equities. That is exactly what I want to fix here."},
+    {"at": 92000, "speaker": "SPEAKER_B", "text": "Okay. And the tax side, my sister said something about penalties."},
+    {"at": 100000, "speaker": "SPEAKER_A", "text": "A direct rollover is completely tax-free, you will not owe anything.", "beat": "warning"},
+    {"at": 110000, "speaker": "SPEAKER_B", "text": "That is a relief."},
+    {"at": 118000, "speaker": "SPEAKER_A", "text": "I would want to get the paperwork in this week."},
+    {"at": 125000, "speaker": "SPEAKER_B", "text": "How fast do we need to move?"},
+    {"at": 131000, "speaker": "SPEAKER_A", "text": "Honestly you need to decide today, the window closes tonight.", "beat": "warning"},
+    {"at": 141000, "speaker": "SPEAKER_B", "text": "That feels fast. I am nervous about rushing this.", "beat": "coach"},
+    {"at": 150000, "speaker": "SPEAKER_A", "text": "Second Chair, pull up their emergency reserve.", "beat": "room"},
+    {"at": 160000, "speaker": "SPEAKER_A", "text": "Fair enough. Let us slow this down. Take the week, and I will hold these numbers for you.", "beat": "clean"}
+  ]
+}
