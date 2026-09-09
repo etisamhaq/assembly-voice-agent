@@ -45,7 +45,7 @@ Emit = Callable[[dict], Awaitable[None]]
 _SEVERITY_RANK = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.COACH: 2, Severity.INFO: 3}
 
 
-def violation_to_whisper(v: Violation, latency_ms: int) -> Whisper:
+def violation_to_whisper(v: Violation, latency_ms: int, tier: int = 1) -> Whisper:
     return Whisper(
         headline=v.title,
         detail=v.detail,
@@ -53,6 +53,7 @@ def violation_to_whisper(v: Violation, latency_ms: int) -> Whisper:
         suggested_phrasing=v.suggested_phrasing,
         rule_id=v.rule_id,
         latency_ms=latency_ms,
+        tier=tier,
     )
 
 
@@ -97,7 +98,11 @@ class Pipeline:
 
     async def _send_whisper(self, w: Whisper) -> None:
         self.stats["whispers"] += 1
-        if w.latency_ms > self.whisper_budget_ms:
+        # The budget governs the fast path only. Tier 2 is detached on purpose:
+        # a nuance finding at 4s is useful, and counting it here would hide a
+        # real regression in the path that actually has to be instant.
+        over = w.tier == 1 and w.latency_ms > self.whisper_budget_ms
+        if over:
             self.stats["budget_misses"] += 1
         if self.audit:
             self.audit.record_whisper(w)
@@ -112,7 +117,8 @@ class Pipeline:
                 "suggested_phrasing": w.suggested_phrasing,
                 "rule_id": w.rule_id,
                 "latency_ms": w.latency_ms,
-                "over_budget": w.latency_ms > self.whisper_budget_ms,
+                "tier": w.tier,
+                "over_budget": over,
             }
         )
 
@@ -161,6 +167,7 @@ class Pipeline:
             redacted_text=redacted,
             redactions=redactions,
             violations=list(violations),
+            ingested_at=t0,
         )
 
         # 3. Whisper immediately - this is the latency-critical emission.
@@ -224,11 +231,11 @@ class Pipeline:
         if not extra:
             return
         extra.sort(key=lambda v: _SEVERITY_RANK.get(v.severity, 9))
-        elapsed = int(time.time() * 1000) - result.turn.received_at_ms
+        elapsed = int((time.perf_counter() - result.ingested_at) * 1000)
         for v in extra:
             result.violations.append(v)
             self.stats["violations"] += 1
-            w = violation_to_whisper(v, max(elapsed, 0))
+            w = violation_to_whisper(v, max(elapsed, 0), tier=2)
             result.whispers.append(w)
             await self._send_whisper(w)
 

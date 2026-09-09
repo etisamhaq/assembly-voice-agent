@@ -91,6 +91,9 @@ class Whisper:
     suggested_phrasing: str = ""
     rule_id: str = ""
     latency_ms: int = 0
+    # 1 = deterministic fast path, held to the whisper budget.
+    # 2 = detached LLM escalation, expected to land later by design.
+    tier: int = 1
     id: str = field(default_factory=_id)
 
 
@@ -116,6 +119,10 @@ class PipelineResult:
     room_reply: RoomReply | None = None
     addressed_to_agent: bool = False
     fast_path_ms: int = 0
+    # perf_counter() at ingest. Turn timestamps may be on a simulated call
+    # timeline, so late-arriving stages must measure against this, not against
+    # wall-clock minus a turn timestamp.
+    ingested_at: float = 0.0
 
     def to_event(self) -> dict[str, Any]:
         return {

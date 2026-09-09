@@ -145,7 +145,7 @@ function renderWhisper(ev) {
     <div class="w-top">
       <span class="w-sev">${esc(ev.severity)}</span>
       <span style="color:var(--dim)">${esc(ev.rule_id)}</span>
-      <span class="w-lat ${ev.over_budget ? "over" : ""}">${ev.latency_ms}ms</span>
+      <span class="w-lat ${ev.over_budget ? "over" : ""}">${ev.tier === 2 ? "tier 2 · " : ""}${ev.latency_ms}ms</span>
     </div>
     <div class="w-head">${esc(ev.headline)}</div>
     ${ev.detail ? `<div class="w-detail">${esc(ev.detail)}</div>` : ""}
