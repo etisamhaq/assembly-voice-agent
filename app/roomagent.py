@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 
 from .clientdata import as_prompt_context
+from .llm import LLMBackend, NullBackend
 from .models import RoomReply
 
 log = logging.getLogger("secondchair.room")
@@ -29,48 +30,32 @@ CLIENT RECORD:
 
 
 class RoomAgent:
-    def __init__(self, *, api_key: str = "", model: str = "claude-opus-5", timeout_s: float = 10.0) -> None:
-        self.model = model
-        self._client = None
-        if api_key:
-            try:
-                import anthropic
-
-                self._client = anthropic.AsyncAnthropic(api_key=api_key, timeout=timeout_s)
-            except ImportError:  # pragma: no cover
-                log.warning("anthropic SDK not installed; room agent disabled")
+    def __init__(self, backend: LLMBackend | None = None) -> None:
+        self.backend: LLMBackend = backend or NullBackend()
 
     @property
     def enabled(self) -> bool:
-        return self._client is not None
+        return self.backend.enabled
+
+    @property
+    def model(self) -> str:
+        return getattr(self.backend, "model", "")
 
     async def answer(self, query: str, history: list[tuple[str, str]], turn_order: int = 0) -> RoomReply:
-        if not self._client:
+        if not self.backend.enabled:
             return RoomReply(
                 text="I'm not connected to the client record right now.",
                 prompt_turn=turn_order,
             )
 
         transcript = "\n".join(f"{who}: {what}" for who, what in history[-12:])
-        try:
-            resp = await self._client.messages.create(
-                model=self.model,
-                max_tokens=300,
-                system=[{"type": "text", "text": _SYSTEM, "cache_control": {"type": "ephemeral"}}],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"RECENT CONVERSATION:\n{transcript}\n\nADVISOR ASKED YOU: {query}",
-                    }
-                ],
-                output_config={"effort": "low"},
-            )
-        except Exception as exc:
-            log.warning("room agent failed: %s", exc)
-            return RoomReply(text="I couldn't reach the record just then.", prompt_turn=turn_order)
-
-        if getattr(resp, "stop_reason", None) == "refusal":
+        reply = await self.backend.complete(
+            system=_SYSTEM,
+            user=f"RECENT CONVERSATION:\n{transcript}\n\nADVISOR ASKED YOU: {query}",
+            max_tokens=300,
+        )
+        if reply.refused:
             return RoomReply(text="I can't help with that one.", prompt_turn=turn_order)
-
-        text = " ".join(b.text for b in resp.content if b.type == "text").strip()
-        return RoomReply(text=text or "I don't have that on file.", prompt_turn=turn_order)
+        return RoomReply(
+            text=reply.text or "I don't have that on file.", prompt_turn=turn_order
+        )

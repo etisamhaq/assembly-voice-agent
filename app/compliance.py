@@ -23,6 +23,7 @@ from typing import Any, Iterable
 
 import yaml
 
+from .llm import LLMBackend, NullBackend
 from .models import Role, Severity, Turn, Violation
 
 log = logging.getLogger("secondchair.compliance")
@@ -156,31 +157,18 @@ that fixes the problem. Not advice about what to do - the actual words.
 
 
 class LLMJudge:
-    """Tier 2. Optional - the product degrades to Tier 1 without an API key."""
+    """Tier 2. Optional - the product degrades to Tier 1 without a backend."""
 
-    def __init__(
-        self,
-        *,
-        api_key: str = "",
-        model: str = "claude-opus-5",
-        effort: str = "low",
-        timeout_s: float = 8.0,
-    ) -> None:
-        self.model = model
-        self.effort = effort
-        self.timeout_s = timeout_s
-        self._client = None
-        if api_key:
-            try:
-                import anthropic
-
-                self._client = anthropic.AsyncAnthropic(api_key=api_key, timeout=timeout_s)
-            except ImportError:  # pragma: no cover
-                log.warning("anthropic SDK not installed; LLM judge disabled")
+    def __init__(self, backend: LLMBackend | None = None) -> None:
+        self.backend: LLMBackend = backend or NullBackend()
 
     @property
     def enabled(self) -> bool:
-        return self._client is not None
+        return self.backend.enabled
+
+    @property
+    def model(self) -> str:
+        return getattr(self.backend, "model", "")
 
     async def review(
         self,
@@ -189,7 +177,7 @@ class LLMJudge:
         history: Iterable[tuple[str, str]],
         already_caught: list[Violation],
     ) -> list[Violation]:
-        if not self._client or turn.role is not Role.ADVISOR:
+        if not self.backend.enabled or turn.role is not Role.ADVISOR:
             return []
 
         transcript = "\n".join(f"{who}: {what}" for who, what in history)
@@ -200,36 +188,20 @@ class LLMJudge:
             f"ADVISOR TURN TO REVIEW:\n{text}"
         )
 
-        try:
-            resp = await self._client.messages.create(
-                model=self.model,
-                max_tokens=2048,
-                system=[{"type": "text", "text": _JUDGE_SYSTEM, "cache_control": {"type": "ephemeral"}}],
-                messages=[{"role": "user", "content": prompt}],
-                output_config={
-                    "effort": self.effort,
-                    "format": {"type": "json_schema", "schema": _JUDGE_SCHEMA},
-                },
-            )
-        except Exception as exc:  # network, rate limit, refusal - never break the call
-            log.warning("LLM judge unavailable for turn %s: %s", turn.turn_order, exc)
-            return []
-
-        if getattr(resp, "stop_reason", None) == "refusal":
-            log.warning("LLM judge refused turn %s", turn.turn_order)
-            return []
-
-        try:
-            block = next(b for b in resp.content if b.type == "text")
-            data = json.loads(block.text)
-        except (StopIteration, json.JSONDecodeError) as exc:
-            log.warning("LLM judge returned unparseable output: %s", exc)
+        data = await self.backend.structured(
+            system=_JUDGE_SYSTEM,
+            user=prompt,
+            schema=_JUDGE_SCHEMA,
+            tool_name="report_violations",
+            max_tokens=2048,
+        )
+        if not data:
             return []
 
         seen = {v.rule_id for v in already_caught}
         out: list[Violation] = []
-        for v in data.get("violations", []):
-            if v.get("rule_id") in seen:
+        for v in data.get("violations", []) or []:
+            if not isinstance(v, dict) or v.get("rule_id") in seen:
                 continue
             out.append(
                 Violation(
@@ -240,7 +212,7 @@ class LLMJudge:
                     detail=v.get("detail", ""),
                     suggested_phrasing=v.get("suggested_phrasing", ""),
                     source="llm",
-                    confidence=float(v.get("confidence", 0.5)),
+                    confidence=float(v.get("confidence", 0.5) or 0.5),
                     quote=v.get("quote", ""),
                 )
             )
