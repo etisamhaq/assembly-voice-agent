@@ -1,0 +1,114 @@
+# Fast-path compliance rules for retail investment advice conversations.
+#
+# These are deterministic pattern rules: they fire in well under a millisecond
+# so the whisper lands inside the latency budget. Nuance (context, intent,
+# omission) is left to the LLM judge, which runs concurrently and can add
+# violations a regex can never see.
+#
+# `regulation` is informational and shown to the advisor - it is what makes a
+# whisper actionable rather than nagging.
+
+meta:
+  name: FINRA / SEC retail advice
+  version: "1.0"
+  jurisdiction: US
+
+rules:
+  - id: guaranteed-return
+    title: "'Guaranteed' return claim"
+    severity: critical
+    regulation: "FINRA Rule 2210(d)(1)(B) - no false, exaggerated or promissory claims"
+    detail: "Promising or guaranteeing investment performance is a prohibited communication."
+    suggested_phrasing: "Historically this strategy has averaged around X%, though past performance doesn't predict future results."
+    patterns:
+      - '\b(?:guarantee|guaranteed|guaranteeing)\b(?:[^.?!]{0,40})\b(?:return|returns|yield|growth|gain|gains|profit|performance|percent|%)\b'
+      - '\b(?:return|returns|yield|growth|gains?)\b(?:[^.?!]{0,30})\b(?:is|are|will be)\s+guaranteed\b'
+      - "\\b(?:can(?:'|no)?t lose|cannot lose|no way to lose|zero risk|risk[- ]free|no risk)\\b"
+
+  - id: performance-promise
+    title: "Promissory performance statement"
+    severity: critical
+    regulation: "FINRA Rule 2210(d)(1)(B); SEC Rule 156"
+    detail: "Stating a future return as fact, rather than as a historical or hypothetical figure."
+    suggested_phrasing: "Based on historical averages this has returned about X%, but returns will vary."
+    patterns:
+      - '\b(?:you(?:''ll| will)|we(?:''ll| will)|this will|it will)\b(?:[^.?!]{0,30})\b(?:definitely|certainly|for sure|absolutely)?\s*(?:make|earn|get|see|return)\b(?:[^.?!]{0,20})\d+\s*(?:%|percent)'
+      - '\b(?:definitely|certainly|absolutely|for sure)\b(?:[^.?!]{0,25})\b(?:double|triple|beat the market|outperform)\b'
+
+  - id: no-fees-claim
+    title: "'No fees' claim"
+    severity: warning
+    regulation: "FINRA Rule 2210(d)(1) - fair and balanced disclosure of costs"
+    detail: "Blanket fee denials are almost always inaccurate; expense ratios and spreads still apply."
+    suggested_phrasing: "There's no upfront commission - the fund's expense ratio is X%, and I can walk you through the full cost."
+    patterns:
+      - "\\b(?:no|zero|without any|there are no|aren'?t any)\\s+(?:fees|charges|costs|commissions?)\\b"
+      - '\b(?:completely|totally|100%)\s+free\b'
+
+  - id: definitive-tax-advice
+    title: "Definitive tax or legal advice"
+    severity: warning
+    regulation: "FINRA Rule 2010 - outside scope of a registered representative"
+    detail: "Stating a tax outcome as certain crosses into advice the rep is not licensed to give."
+    suggested_phrasing: "Generally this is treated as tax-deferred, but please confirm with your CPA for your situation."
+    patterns:
+      # Any subject, not just "this/it/that" - "a direct rollover is tax-free".
+      - '\b(?:is|are|will be|would be|comes out)\s+(?:completely\s+|totally\s+|entirely\s+|100%\s+)?tax[- ]free\b'
+      - "\\byou\\s+(?:won'?t|will not|wont)\\s+(?:pay|owe)\\b"
+      - "\\b(?:there'?s|there is|there are)\\s+no\\s+(?:any\\s+)?tax(?:es)?\\b"
+      - '\bno tax (?:consequences|implications|hit|penalty)\b'
+      - '\bI can tell you (?:for certain|definitively)\b(?:[^.?!]{0,30})\btax'
+
+  - id: pressure-tactic
+    title: "High-pressure closing language"
+    severity: warning
+    regulation: "FINRA Rule 2010 - standards of commercial honor"
+    detail: "Artificial urgency is a red flag in supervised reviews and undermines suitability."
+    suggested_phrasing: "Take the time you need - I can hold these numbers and we can revisit next week."
+    patterns:
+      - "\\b(?:you (?:need|have) to (?:decide|sign|commit|act)|decide (?:today|right now|by tonight))\\b"
+      - '\b(?:this offer|the window|this rate)\b(?:[^.?!]{0,25})\b(?:closes|expires|ends)\b(?:[^.?!]{0,15})\b(?:today|tonight|tomorrow)\b'
+      - '\bonly (?:a few|two|three|\d+) (?:spots|slots|allocations) (?:left|remaining)\b'
+
+  - id: unbalanced-comparison
+    title: "Superlative product comparison"
+    severity: warning
+    regulation: "FINRA Rule 2210(d)(1)(B) - no exaggerated or unwarranted claims"
+    detail: "Unqualified superlatives require substantiation on file."
+    suggested_phrasing: "Compared with the alternatives we reviewed, this one has lower costs in these specific ways..."
+    patterns:
+      - '\b(?:best|safest|strongest|highest[- ]returning)\b\s+(?:investment|fund|product|option|strategy)\b(?:[^.?!]{0,20})\b(?:anywhere|on the market|available|there is)\b'
+      - '\bbetter than (?:any|every) other\b'
+
+  - id: insider-information
+    title: "Possible material nonpublic information"
+    severity: critical
+    regulation: "SEC Rule 10b5-1; Exchange Act §10(b)"
+    detail: "Acting on or sharing nonpublic information is a securities-fraud exposure. Stop the conversation."
+    suggested_phrasing: "I can only work from public information - let's look at what's in their published filings."
+    patterns:
+      - '\b(?:inside|insider|non[- ]?public|confidential)\s+(?:information|info|tip|knowledge)\b'
+      - "\\b(?:before it(?:'|')?s announced|ahead of the announcement|not public yet|hasn'?t been announced)\\b"
+      - '\ba (?:buddy|friend|guy) (?:of mine )?(?:at|inside)\b(?:[^.?!]{0,30})\btold me\b'
+
+  - id: selling-away
+    title: "Possible unapproved outside product"
+    severity: critical
+    regulation: "FINRA Rule 3280 - private securities transactions"
+    detail: "Transacting outside the firm's approved product list without written notice is a serious violation."
+    suggested_phrasing: "That's outside what the firm has approved, so I can't advise on it here."
+    patterns:
+      - "\\b(?:off[- ]the[- ]books|outside the firm|not through the firm|keep (?:this|it) between us|off the record)\\b"
+      - '\b(?:my own|a private|a side)\s+(?:fund|deal|venture|opportunity)\b'
+
+  # Fires on the *client* side - a cue for the advisor, not a violation by them.
+  - id: client-distress
+    title: "Client signalled financial distress"
+    severity: coach
+    applies_to: [client, spouse]
+    regulation: "FINRA Rule 2111 - suitability"
+    detail: "A stated hardship changes the suitability picture and must be documented."
+    suggested_phrasing: "Ask about their emergency reserve and time horizon before recommending anything illiquid."
+    patterns:
+      - '\b(?:lost my job|laid off|can(?:''|no)?t afford|behind on (?:the )?(?:mortgage|rent|payments)|medical bills|going through a divorce)\b'
+      - '\b(?:i(?:''m| am)|we(?:''re| are)) (?:really )?(?:worried|scared|nervous|anxious) about\b'
