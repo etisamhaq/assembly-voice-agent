@@ -1,0 +1,57 @@
+# Render blueprint for Second Chair.
+#
+# The app holds per-session state in memory and keeps a WebSocket open for the
+# duration of a call, so it needs an always-on container - not a serverless
+# function. Render's free plan supports WebSockets but idles the service after
+# ~15 minutes; upgrade to Starter before demoing to anyone.
+
+services:
+  - type: web
+    name: second-chair
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+
+    envVars:
+      # --- Secrets: set in the Render dashboard, never committed -------------
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+
+      # --- LLM routing ------------------------------------------------------
+      - key: SC_LLM_BACKEND
+        value: auto
+      - key: SC_LLM_REGION
+        value: us
+      - key: SC_GROQ_JUDGE_MODEL
+        value: openai/gpt-oss-120b
+      - key: SC_GROQ_ROOM_MODEL
+        value: openai/gpt-oss-20b
+      - key: SC_GATEWAY_MODEL
+        value: qwen3.5-4b-32k-fast
+
+      # --- Behaviour --------------------------------------------------------
+      - key: SC_SOURCE
+        value: simulated
+      - key: SC_MAX_SPEAKERS
+        value: "3"
+      - key: SC_SILENCE_NUDGE_SECONDS
+        value: "90"
+      - key: SC_WHISPER_LATENCY_BUDGET_MS
+        value: "1000"
+
+      # Free plan has no persistent disk, so the audit log is ephemeral.
+      # Attach a disk mounted here on a paid plan to keep session records.
+      - key: SC_AUDIT_DIR
+        value: /tmp/audit
+      - key: PYTHONUNBUFFERED
+        value: "1"

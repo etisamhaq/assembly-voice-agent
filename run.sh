@@ -7,7 +7,7 @@ if [ ! -d .venv ]; then
   echo "→ creating venv"
   python3 -m venv .venv
   .venv/bin/pip install -q --upgrade pip
-  .venv/bin/pip install -q -r requirements.txt
+  .venv/bin/pip install -q -r requirements-dev.txt
 fi
 
 [ -f .env ] || { cp .env.example .env; echo "→ wrote .env (add your keys)"; }

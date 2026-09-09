@@ -69,7 +69,11 @@ class Settings:
 
     sample_rate: int = 16_000
     rules_path: Path = ROOT / "rules" / "finra.yaml"
-    audit_dir: Path = ROOT.parent / "audit"
+    # Overridable because a container's app directory is usually read-only,
+    # and on Render's free plan (no disks) this has to live somewhere ephemeral.
+    audit_dir: Path = field(
+        default_factory=lambda: Path(os.getenv("SC_AUDIT_DIR", str(ROOT.parent / "audit")))
+    )
 
     @property
     def llm_enabled(self) -> bool:
