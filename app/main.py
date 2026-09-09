@@ -34,6 +34,9 @@ log = logging.getLogger("secondchair")
 app = FastAPI(title="Second Chair", version="1.0.0")
 
 _rules = RuleEngine.from_path(settings.rules_path)
+# Probed once at import so /api/health can report the resolved wiring.
+_judge = build_judge()
+_room = build_room_agent()
 
 
 def build_tts() -> TTS:
@@ -56,8 +59,13 @@ async def health() -> JSONResponse:
                 "room_agent": settings.llm_enabled,
                 "server_tts": settings.tts_enabled,
             },
-            "models": {"judge": settings.judge_model, "room": settings.room_model},
-            "llm_backend": build_judge().backend.name,
+            # Report what is actually wired up, not the settings for a
+            # backend that may not be the active one.
+            "llm": {
+                "backend": _judge.backend.name,
+                "judge_model": _judge.model,
+                "room_model": _room.model,
+            },
             "default_source": settings.source,
             "whisper_budget_ms": settings.whisper_budget_ms,
         }

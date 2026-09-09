@@ -20,7 +20,9 @@ def test_health(client):
     assert body["status"] == "ok"
     assert body["rules_loaded"] >= 9
     assert set(body["capabilities"]) == {"live_audio", "llm_judge", "room_agent", "server_tts"}
-    assert body["models"]["judge"]
+    # Must describe the backend that is actually wired up.
+    assert set(body["llm"]) == {"backend", "judge_model", "room_model"}
+    assert body["llm"]["backend"] in {"groq", "assemblyai-gateway", "anthropic", "none"}
 
 
 def test_rules_endpoint_exposes_the_pack(client):
