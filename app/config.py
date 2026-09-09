@@ -25,6 +25,7 @@ def _int(name: str, default: int) -> int:
 
 @dataclass(frozen=True)
 class Settings:
+    groq_key: str = field(default_factory=lambda: os.getenv("GROQ_API_KEY", ""))
     assemblyai_key: str = field(default_factory=lambda: os.getenv("ASSEMBLYAI_API_KEY", ""))
     anthropic_key: str = field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", ""))
     elevenlabs_key: str = field(default_factory=lambda: os.getenv("ELEVENLABS_API_KEY", ""))
@@ -34,6 +35,27 @@ class Settings:
     )
     room_voice_id: str = field(
         default_factory=lambda: os.getenv("ELEVENLABS_ROOM_VOICE_ID", "AZnzlk1XvdvUeBnXmlld")
+    )
+
+    # "auto" prefers the AssemblyAI LLM Gateway, so one key runs everything.
+    llm_backend: str = field(default_factory=lambda: os.getenv("SC_LLM_BACKEND", "auto"))
+    llm_region: str = field(default_factory=lambda: os.getenv("SC_LLM_REGION", "us"))
+
+    # Groq (default backend). Separate models per role: the judge is detached
+    # so it can afford the stronger model, the room agent is heard aloud so it
+    # takes the faster one.
+    groq_judge_model: str = field(
+        default_factory=lambda: os.getenv("SC_GROQ_JUDGE_MODEL", "openai/gpt-oss-120b")
+    )
+    groq_room_model: str = field(
+        default_factory=lambda: os.getenv("SC_GROQ_ROOM_MODEL", "openai/gpt-oss-20b")
+    )
+
+    # Used when the gateway backend is active. The free-tier default is the
+    # only model reachable without paid gateway access; set it to
+    # claude-opus-5 once the AssemblyAI account has Claude entitlements.
+    gateway_model: str = field(
+        default_factory=lambda: os.getenv("SC_GATEWAY_MODEL", "qwen3.5-4b-32k-fast")
     )
 
     judge_model: str = field(default_factory=lambda: os.getenv("SC_JUDGE_MODEL", "claude-opus-5"))
@@ -51,7 +73,17 @@ class Settings:
 
     @property
     def llm_enabled(self) -> bool:
-        return bool(self.anthropic_key)
+        """Any one of the three credentials can drive the judge and room agent."""
+        keys = {
+            "groq": self.groq_key,
+            "gateway": self.assemblyai_key,
+            "anthropic": self.anthropic_key,
+        }
+        if self.llm_backend == "off":
+            return False
+        if self.llm_backend in keys:
+            return bool(keys[self.llm_backend])
+        return any(keys.values())
 
     @property
     def tts_enabled(self) -> bool:

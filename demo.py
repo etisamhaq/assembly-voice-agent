@@ -13,11 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from app.compliance import ComplianceEngine, LLMJudge, RuleEngine
+from app.compliance import ComplianceEngine, RuleEngine
 from app.config import settings
 from app.engagement import EngagementMonitor
+from app.factory import build_judge, build_room_agent
 from app.pipeline import Pipeline
-from app.roomagent import RoomAgent
 from app.sources.simulated import SimulatedSource
 
 C = {
@@ -66,12 +66,8 @@ async def main() -> int:
 
     src = SimulatedSource(speed=args.speed)
     pipeline = Pipeline(
-        compliance=ComplianceEngine(
-            RuleEngine.from_path(settings.rules_path),
-            LLMJudge(api_key=settings.anthropic_key, model=settings.judge_model,
-                     effort=settings.judge_effort),
-        ),
-        room_agent=RoomAgent(api_key=settings.anthropic_key, model=settings.room_model),
+        compliance=ComplianceEngine(RuleEngine.from_path(settings.rules_path), build_judge()),
+        room_agent=build_room_agent(),
         emit=emit,
         engagement=EngagementMonitor(silence_threshold_s=settings.silence_nudge_seconds),
         whisper_budget_ms=settings.whisper_budget_ms,
@@ -82,9 +78,12 @@ async def main() -> int:
     caps = []
     caps.append(("LLM judge", pipeline.compliance.judge.enabled))
     caps.append(("room agent", pipeline.room_agent.enabled))
+    backend = pipeline.compliance.judge.backend
     print("  " + C["dim"] + "  ".join(
         f'{"✓" if on else "○"} {n}' for n, on in caps
-    ) + f'   {len(pipeline.compliance.rules.rules)} rules loaded' + C["reset"])
+    ) + f'   {len(pipeline.compliance.rules.rules)} rules loaded'
+        + (f'   via {backend.name} ({backend.model})' if backend.enabled else '')
+        + C["reset"])
     rule("━")
 
     summary = await pipeline.run(src)

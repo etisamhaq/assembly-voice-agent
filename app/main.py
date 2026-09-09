@@ -15,12 +15,12 @@ from fastapi.staticfiles import StaticFiles
 from .addressivity import AddressivityDetector
 from .audit import AuditLog
 from .channels import TTS, whisper_speech
-from .compliance import ComplianceEngine, LLMJudge, RuleEngine
+from .compliance import ComplianceEngine, RuleEngine
 from .config import WEB_DIR, settings
 from .engagement import EngagementMonitor
+from .factory import build_judge, build_room_agent
 from .models import Channel
 from .pipeline import Pipeline
-from .roomagent import RoomAgent
 from .sources.assemblyai import AssemblyAIStreamingSource
 from .sources.simulated import SimulatedSource
 
@@ -57,6 +57,7 @@ async def health() -> JSONResponse:
                 "server_tts": settings.tts_enabled,
             },
             "models": {"judge": settings.judge_model, "room": settings.room_model},
+            "llm_backend": build_judge().backend.name,
             "default_source": settings.source,
             "whisper_budget_ms": settings.whisper_budget_ms,
         }
@@ -102,15 +103,8 @@ class Session:
         self._closed = False
 
         self.pipeline = Pipeline(
-            compliance=ComplianceEngine(
-                _rules,
-                LLMJudge(
-                    api_key=settings.anthropic_key,
-                    model=settings.judge_model,
-                    effort=settings.judge_effort,
-                ),
-            ),
-            room_agent=RoomAgent(api_key=settings.anthropic_key, model=settings.room_model),
+            compliance=ComplianceEngine(_rules, build_judge()),
+            room_agent=build_room_agent(),
             emit=self.emit,
             addressivity=AddressivityDetector(),
             engagement=EngagementMonitor(silence_threshold_s=settings.silence_nudge_seconds),
