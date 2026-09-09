@@ -4,6 +4,11 @@
 
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon).
 
+**Live demo → https://second-chair-toe5.onrender.com**  ·  press *Start call*
+
+> Hosted on Render's free plan, which sleeps after ~15 minutes idle. The first
+> request may take 30–60s to wake the container; everything after that is instant.
+
 ---
 
 ## The gap
@@ -44,6 +49,24 @@ A financial advisor is on a call with a client and their spouse about a 401(k) r
 Run `python demo.py` to watch exactly this, with no API keys.
 
 ---
+
+## Deployment
+
+```bash
+docker build -t second-chair .
+docker run -p 8000:8000 -e GROQ_API_KEY=... -e ASSEMBLYAI_API_KEY=... second-chair
+```
+
+The app holds per-session state in memory and keeps a WebSocket open for the length of a call,
+so it needs an always-on container — serverless functions will not work. `render.yaml` is a
+ready blueprint; the same image runs on Fly.io, Railway, or any container host.
+
+Two things to know about free tiers: the container sleeps when idle (a cold start mid-demo is
+worse than it sounds), and there is no persistent disk, so `SC_AUDIT_DIR` points at `/tmp` and
+audit logs vanish on restart. Mount a volume and repoint `SC_AUDIT_DIR` to keep them.
+
+HTTPS is not optional — browsers block `getUserMedia` on plain HTTP, so live mic mode simply
+will not start without it.
 
 ## Quick start
 
