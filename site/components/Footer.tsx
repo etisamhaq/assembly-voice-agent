@@ -41,13 +41,13 @@ export default function Footer() {
             <ul>
               <li><a href="https://www.assemblyai.com/docs/speech-to-text/universal-streaming" target="_blank" rel="noreferrer">AssemblyAI Streaming</a></li>
               <li><a href="https://www.assemblyai.com/docs/llm-gateway/quickstart" target="_blank" rel="noreferrer">AssemblyAI LLM Gateway</a></li>
-              <li><a href="https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon" target="_blank" rel="noreferrer">Voice Agent Hackathon</a></li>
+              <li><a href="https://groq.com" target="_blank" rel="noreferrer">Groq Cloud</a></li>
             </ul>
           </div>
         </div>
 
         <div className="foot-base">
-          <span>Second Chair — built for the AssemblyAI Voice Agent Hackathon.</span>
+          <span>&copy; {new Date().getFullYear()} Second Chair</span>
           <span className="disclaimer">
             The shipped rule pack is a demonstration of the mechanism, not a compliance product.
             A real deployment needs rules reviewed by counsel.

@@ -1,3 +1,4 @@
+export const SITE_URL = "https://second-chair-chi.vercel.app";
 export const DEMO_URL = "https://second-chair-toe5.onrender.com";
 export const REPO_URL = "https://github.com/etisamhaq/assembly-voice-agent";
 
@@ -226,8 +227,8 @@ export const faqs = [
     a: "Yes. Rules are a YAML file — an identifier, a severity, the regulation cited, the phrasing to suggest, and the patterns that trigger it. The nine shipped rules are a credible FINRA and SEC starting point for demonstration, not a compliance product. A real deployment needs a pack reviewed by counsel.",
   },
   {
-    q: "Is it production ready?",
-    a: "The pipeline is real and covered by 130 automated tests, and the demo you can open is the actual system, not a recording. It is a hackathon build: the client record is a fixture rather than a CRM integration, and live microphone mode assumes one shared room microphone rather than per-speaker channels.",
+    q: "What does a deployment actually involve?",
+    a: "Three things. A rule pack for your jurisdiction and product set, reviewed by your compliance function — rules are a YAML file, so this is configuration rather than engineering. A connection to wherever your client records live, replacing the fixture the demo answers from. And a decision about audio capture: a single room microphone works, but per-speaker channels give cleaner separation and are worth it for recorded calls.",
   },
   {
     q: "Why is the demo slow to load?",
