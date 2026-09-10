@@ -272,3 +272,45 @@ footer {
   .session-title { order: 10; flex-basis: 100%; }
   footer { flex-wrap: wrap; gap: 14px; }
 }
+
+/* ------------------------------------------------------ end-of-call record */
+
+.summary {
+  margin-top: 22px; padding: 16px 18px 15px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: linear-gradient(180deg, rgba(110,168,255,.05), transparent);
+  animation: rise .3s ease-out;
+}
+.sum-head {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--room); margin-bottom: 12px;
+}
+.sum-grid { display: grid; gap: 1px; background: var(--line-soft); border-radius: 5px; overflow: hidden; }
+.sum-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 8px 11px; background: var(--panel);
+}
+.sum-row .k { font-size: 12.5px; color: var(--muted); }
+.sum-row .v {
+  margin-left: auto; font-family: var(--mono); font-size: 13px;
+  font-weight: 600; color: var(--text);
+}
+.sum-row .v.crit { color: var(--critical); }
+.sum-row .v.warn { color: var(--warning); }
+.sum-row .v.ok   { color: var(--coach); }
+.sum-foot {
+  margin-top: 11px; font-size: 11.5px; line-height: 1.5; color: var(--dim);
+}
+
+/* --------------------------------------------------------- severity legend */
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.legend .item {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--dim);
+}
+.legend .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.legend .swatch.critical { background: var(--critical); }
+.legend .swatch.warning  { background: var(--warning); }
+.legend .swatch.coach    { background: var(--coach); }

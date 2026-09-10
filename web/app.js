@@ -176,6 +176,38 @@ function renderRoom(ev) {
   paintStats();
 }
 
+/** The deliverable: what a compliance reviewer would actually be handed. */
+function renderSummary(ev) {
+  const sev = ev.violations_by_severity || {};
+  const air = ev.airtime || {};
+  const quietest = Object.entries(air)
+    .filter(([role]) => role !== "advisor")
+    .sort((a, b) => a[1] - b[1])[0];
+
+  const row = (k, v, cls) =>
+    `<div class="sum-row"><span class="k">${esc(k)}</span><span class="v ${cls || ""}">${esc(v)}</span></div>`;
+
+  const node = document.createElement("div");
+  node.className = "summary";
+  node.innerHTML = `
+    <div class="sum-head">Session record</div>
+    <div class="sum-grid">
+      ${row("Turns on the record", ev.turns)}
+      ${row("Critical findings", sev.critical || 0, (sev.critical ? "crit" : "ok"))}
+      ${row("Warnings", sev.warning || 0, (sev.warning ? "warn" : "ok"))}
+      ${row("Coaching cues", sev.coach || 0)}
+      ${row("Identifiers redacted", ev.redactions)}
+      ${row("Spoken aloud by the agent", `${ev.room_replies} of ${ev.turns} turns`)}
+      ${row("Worst fast-path latency", `${ev.max_fast_path_ms} ms`, (ev.budget_misses ? "crit" : "ok"))}
+      ${quietest ? row("Quietest participant", `${quietest[0]}, ${Math.round(quietest[1] * 100)}% of airtime`) : ""}
+    </div>
+    <div class="sum-foot">Written to an append-only log — speaker-attributed, PII-free,
+      with the regulation cited beside each finding.</div>`;
+
+  el.transcript.appendChild(node);
+  el.transcript.scrollTop = el.transcript.scrollHeight;
+}
+
 function paintStats() {
   el.sTurns.textContent = stats.turns;
   el.sViol.textContent = stats.violations;
@@ -280,6 +312,7 @@ async function start() {
       case "session.end":
         paintAirtime(ev.airtime || {});
         el.title.textContent += "  ·  call ended";
+        renderSummary(ev);
         break;
       case "audit.ready":
         el.title.textContent += `  ·  audit → ${ev.path.split("/").pop()}`;
