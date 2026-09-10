@@ -4,6 +4,7 @@
 
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon).
 
+**Website → https://second-chair-chi.vercel.app**
 **Live demo → https://second-chair-toe5.onrender.com**  ·  press *Start call*
 
 > Hosted on Render's free plan, which sleeps after ~15 minutes idle. The first
@@ -52,6 +53,16 @@ Run `python demo.py` to watch exactly this, with no API keys.
 
 ## Deployment
 
+Two deployments, on purpose:
+
+| What | Where | Why |
+|---|---|---|
+| The app (`app/`, `web/`) | Render, one Docker container | Holds session state in memory and keeps a WebSocket open for the length of a call — it needs an always-on container |
+| The marketing site (`site/`) | Vercel, Next.js static | Seven prerendered pages, no server needed |
+
+The site reads the app's `/api/health` cross-origin to tell visitors whether the demo container
+is awake before they click, which is why the app sets `SC_CORS_ORIGINS` (default `*`, read-only).
+
 ```bash
 docker build -t second-chair .
 docker run -p 8000:8000 -e GROQ_API_KEY=... -e ASSEMBLYAI_API_KEY=... second-chair
@@ -80,7 +91,7 @@ zero configuration.
 ```bash
 python demo.py                    # same call, in the terminal, instantly
 python demo.py --speed 1          # real time, for recording narration
-pytest                            # 130 tests, offline
+pytest                            # 132 tests, offline
 ```
 
 Add keys to `.env` to light up the rest:
@@ -248,7 +259,8 @@ app/
   audit.py         append-only, PII-free session record
   main.py          FastAPI + WebSocket
 web/            the operator console
-tests/          130 tests
+site/           the marketing site (Next.js, deployed separately)
+tests/          132 tests
 ```
 
 ## Testing
