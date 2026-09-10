@@ -87,3 +87,29 @@ def test_fast_path_is_actually_fast(engine):
 
 def test_llm_judge_disabled_without_key(engine):
     assert engine.judge.enabled is False
+
+
+SPOKEN_NUMBERS = [
+    "You'll definitely make twelve percent on this.",
+    "You'll make eight percent a year.",
+    "This will return fifteen percent.",
+]
+
+
+@pytest.mark.parametrize("text", SPOKEN_NUMBERS)
+def test_spoken_number_words_are_caught(rules, text):
+    """Live speech gives number words, not digits. A digits-only pattern
+    silently misses every promise made out loud."""
+    assert rules.scan(text, Role.ADVISOR), f"missed spoken-number promise: {text!r}"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "You'll see your statement in the post.",
+        "Returns have ranged from three to nine percent historically.",
+        "We will get the paperwork over to you.",
+    ],
+)
+def test_spoken_numbers_do_not_over_trigger(rules, text):
+    assert rules.scan(text, Role.ADVISOR) == [], f"false positive on {text!r}"

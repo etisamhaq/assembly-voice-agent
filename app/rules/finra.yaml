@@ -32,8 +32,11 @@ rules:
     detail: "Stating a future return as fact, rather than as a historical or hypothetical figure."
     suggested_phrasing: "Based on historical averages this has returned about X%, but returns will vary."
     patterns:
-      - '\b(?:you(?:''ll| will)|we(?:''ll| will)|this will|it will)\b(?:[^.?!]{0,30})\b(?:definitely|certainly|for sure|absolutely)?\s*(?:make|earn|get|see|return)\b(?:[^.?!]{0,20})\d+\s*(?:%|percent)'
-      - '\b(?:definitely|certainly|absolutely|for sure)\b(?:[^.?!]{0,25})\b(?:double|triple|beat the market|outperform)\b'
+      # Speech-to-text yields spoken number words as often as digits, so a
+      # digits-only pattern silently misses "you'll make twelve percent".
+      - "\\b(?:you|we|this|it)(?:'ll| will)\\b(?:[^.?!]{0,30})\\b(?:make|earn|get|see|return)\\b(?:[^.?!]{0,25})(?:\\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty)\\s*(?:%|percent)"
+      - '\b(?:definitely|certainly|absolutely|guaranteed|for sure)\b(?:[^.?!]{0,25})\b(?:double|triple|beat the market|outperform)\b'
+      - "\\b(?:you|we)(?:'ll| will)\\b\\s*(?:definitely|certainly|absolutely|for sure)\\s*(?:make|earn|see|get)\\b"
 
   - id: no-fees-claim
     title: "'No fees' claim"
