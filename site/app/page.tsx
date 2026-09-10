@@ -8,32 +8,43 @@ export default function Home() {
   return (
     <>
       <section className="hero">
-        <div className="wrap">
-          <h1>Every voice agent assumes two people in the room.</h1>
-          <p className="lede">
-            Second Chair is built for three. It knows who is talking, warns the professional
-            privately the moment they cross a regulatory line, and says nothing at all for the
-            other ninety percent of the conversation.
-          </p>
-          <div className="hero-actions">
-            <a className="btn btn-primary" href={DEMO_URL} target="_blank" rel="noreferrer">
-              Open the demo
-            </a>
-            <Link className="btn btn-ghost" href="/how-it-works">
-              See how it works
-            </Link>
-            <DemoStatus />
+        <div className="wrap record">
+          <div className="col-main">
+            <h1>Every voice agent assumes two people in the room.</h1>
+            <p className="lede">
+              Second Chair is built for three. It knows who is talking, warns the professional
+              privately the moment they cross a regulatory line, and says nothing at all for the
+              other ninety percent of the conversation.
+            </p>
+            <div className="hero-actions">
+              <a className="btn btn-primary" href={DEMO_URL} target="_blank" rel="noreferrer">
+                Open the demo
+              </a>
+              <Link className="btn btn-ghost" href="/how-it-works">
+                See how it works
+              </Link>
+              <DemoStatus />
+            </div>
           </div>
+
+          <aside className="margin">
+            <h4>How to read the transcript below</h4>
+            <p>
+              The left column is the room: everything all three people hear. The right column is
+              the advisor&rsquo;s earpiece, and nobody else in the room knows it exists.
+            </p>
+            <p>
+              Watch the gap between a flagged phrase and the warning beside it. That gap is the
+              whole product.
+            </p>
+            <cite>Playing a real excerpt, timed as it happened</cite>
+          </aside>
         </div>
       </section>
 
-      <section style={{ paddingTop: 0, borderTop: 0 }}>
+      <section className="hero-demo">
         <div className="wrap">
           <HeroTranscript />
-          <p className="note" style={{ marginTop: 14, maxWidth: "62ch" }}>
-            A real excerpt from the reference call. The left column is what everyone in the room
-            hears. The right column is what only the advisor hears.
-          </p>
         </div>
       </section>
 

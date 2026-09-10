@@ -226,7 +226,9 @@ aside.margin cite {
 
 /* -------------------------------------------------------------------- hero */
 
-.hero { padding-block: clamp(48px, 7vw, 92px) clamp(52px, 7vw, 96px); }
+.hero { padding-block: clamp(48px, 7vw, 92px) clamp(36px, 4vw, 56px); }
+/* The transcript is the hero's second half, not a separate section. */
+.hero-demo { padding-block: 0 clamp(56px, 8vw, 100px); border-top: 0; }
 .hero h1 { max-width: 15ch; }
 .hero .lede { margin-top: 22px; }
 .hero-actions { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
