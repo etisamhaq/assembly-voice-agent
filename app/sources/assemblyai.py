@@ -19,7 +19,7 @@ from collections import Counter
 from typing import AsyncIterator
 from urllib.parse import urlencode
 
-from ..models import Turn
+from ..models import Role, Turn
 from .base import RoleResolver
 
 log = logging.getLogger("secondchair.assemblyai")
@@ -47,6 +47,7 @@ class AssemblyAIStreamingSource:
         self._ws = None
         self._audio: asyncio.Queue[bytes | None] = asyncio.Queue(maxsize=256)
         self._closed = False
+        self._last_speaker: str | None = None
         self.session_id: str | None = None
 
     @property
@@ -86,25 +87,45 @@ class AssemblyAIStreamingSource:
                 break
 
     @staticmethod
-    def _dominant_speaker(msg: dict) -> str:
-        """Per-word labels -> the speaker who owns this turn."""
+    def _dominant_speaker(msg: dict) -> str | None:
+        """Per-word labels -> the speaker who owns this turn, or None.
+
+        None matters: early partials arrive before diarization has settled and
+        carry no labels at all. Inventing one there would claim a seat.
+        """
         words = msg.get("words") or []
         labels = [w.get("speaker") for w in words if w.get("speaker")]
         if labels:
             return Counter(labels).most_common(1)[0][0]
-        return msg.get("speaker") or "SPEAKER_A"
+        return msg.get("speaker") or None
 
     def _to_turn(self, msg: dict) -> Turn:
         words = msg.get("words") or []
-        speaker = self._dominant_speaker(msg)
+        final = bool(msg.get("end_of_turn", False))
+        label = self._dominant_speaker(msg)
+
+        if label is None:
+            # Unlabelled: attribute it to whoever last held the floor rather
+            # than allocating a seat to a speaker diarization never reported.
+            speaker = self._last_speaker or "SPEAKER_A"
+            role = self.resolver.peek(self._last_speaker) or Role.UNKNOWN
+        elif final:
+            speaker = label
+            role = self.resolver.seat(label)
+            self._last_speaker = label
+        else:
+            # A partial may name a speaker, but seating waits for the final.
+            speaker = label
+            role = self.resolver.peek(label) or Role.UNKNOWN
+
         return Turn(
             text=(msg.get("transcript") or "").strip(),
             speaker=speaker,
-            role=self.resolver.resolve(speaker),
+            role=role,
             turn_order=int(msg.get("turn_order", 0)),
             start_ms=int(words[0]["start"]) if words else 0,
             end_ms=int(words[-1]["end"]) if words else 0,
-            end_of_turn=bool(msg.get("end_of_turn", False)),
+            end_of_turn=final,
             confidence=float(msg.get("end_of_turn_confidence", 1.0)),
         )
 

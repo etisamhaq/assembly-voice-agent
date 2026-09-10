@@ -32,13 +32,28 @@ class RoleResolver:
         self.seats = seats
         self._map: dict[str, Role] = {}
 
-    def resolve(self, speaker: str) -> Role:
+    def peek(self, speaker: str | None) -> Role | None:
+        """The role already assigned to a label, without claiming a seat."""
+        return self._map.get(speaker) if speaker else None
+
+    def seat(self, speaker: str) -> Role:
+        """Claim the next seat for a diarization label.
+
+        Only ever call this for a real label on a finalized turn. Seating from
+        a partial - or from a synthetic placeholder used before diarization has
+        settled - burns the advisor seat on a speaker who does not exist, and
+        every real person then shifts one seat down.
+        """
         if speaker in self._map:
             return self._map[speaker]
         idx = len(self._map)
         role = self.seats[idx] if idx < len(self.seats) else Role.UNKNOWN
         self._map[speaker] = role
         return role
+
+    def resolve(self, speaker: str) -> Role:
+        """Backwards-compatible alias for `seat`."""
+        return self.seat(speaker)
 
     def override(self, speaker: str, role: Role) -> None:
         self._map[speaker] = role

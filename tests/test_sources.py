@@ -93,3 +93,74 @@ async def test_simulated_roles_come_from_the_script():
     assert set(by_role[Role.ADVISOR]) == {"SPEAKER_A"}
     assert set(by_role[Role.CLIENT]) == {"SPEAKER_B"}
     assert set(by_role[Role.SPOUSE]) == {"SPEAKER_C"}
+
+
+def _msg(transcript, *, final, words=None, speaker=None):
+    m = {"type": "Turn", "transcript": transcript, "end_of_turn": final}
+    if words is not None:
+        m["words"] = words
+    if speaker is not None:
+        m["speaker"] = speaker
+    return m
+
+
+def _w(text, speaker=None, start=0, end=100):
+    w = {"text": text, "start": start, "end": end}
+    if speaker:
+        w["speaker"] = speaker
+    return w
+
+
+def test_unlabelled_partials_do_not_claim_the_advisor_seat():
+    """The live-mic bug: early partials arrive before diarization settles and
+    carry no speaker labels. Seating one burned the advisor seat, so the first
+    real person was labelled the client and no advisor rules ever fired."""
+    s = AssemblyAIStreamingSource("k")
+
+    # Partials with no labels at all, exactly as they arrive at session start.
+    s._to_turn(_msg("this fund is", final=False))
+    s._to_turn(_msg("this fund is guaranteed", final=False))
+
+    # Then the first finalized turn, with real diarization.
+    t = s._to_turn(_msg("This fund is guaranteed to return 8% a year.", final=True,
+                        words=[_w("This", "A"), _w("fund", "A"), _w("guaranteed", "A")]))
+    assert t.role is Role.ADVISOR, "the first real speaker must be the advisor"
+
+
+def test_labelled_partial_does_not_seat_before_its_final():
+    s = AssemblyAIStreamingSource("k")
+    p = s._to_turn(_msg("hello", final=False, words=[_w("hello", "B")]))
+    assert p.role is Role.UNKNOWN
+    assert s.resolver.assignments() == {}, "a partial must not claim a seat"
+
+    f = s._to_turn(_msg("hello there", final=True, words=[_w("hello", "B")]))
+    assert f.role is Role.ADVISOR
+
+
+def test_seats_fill_in_order_of_first_finalized_turn():
+    s = AssemblyAIStreamingSource("k")
+    a = s._to_turn(_msg("one", final=True, words=[_w("one", "A")]))
+    b = s._to_turn(_msg("two", final=True, words=[_w("two", "B")]))
+    c = s._to_turn(_msg("three", final=True, words=[_w("three", "C")]))
+    again = s._to_turn(_msg("four", final=True, words=[_w("four", "A")]))
+    assert [a.role, b.role, c.role] == [Role.ADVISOR, Role.CLIENT, Role.SPOUSE]
+    assert again.role is Role.ADVISOR, "labels must stay stable across turns"
+
+
+def test_unlabelled_final_is_attributed_to_whoever_last_held_the_floor():
+    s = AssemblyAIStreamingSource("k")
+    s._to_turn(_msg("one", final=True, words=[_w("one", "A")]))
+    t = s._to_turn(_msg("still me", final=True))
+    assert t.role is Role.ADVISOR
+    assert len(s.resolver.assignments()) == 1, "no phantom seat was allocated"
+
+
+def test_solo_speaker_is_always_the_advisor():
+    """Testing alone with one microphone must put you in the advisor seat,
+    or none of the advisor-scoped rules can fire."""
+    s = AssemblyAIStreamingSource("k")
+    roles = set()
+    for i in range(5):
+        s._to_turn(_msg(f"partial {i}", final=False))
+        roles.add(s._to_turn(_msg(f"line {i}", final=True, words=[_w("x", "A")])).role)
+    assert roles == {Role.ADVISOR}
