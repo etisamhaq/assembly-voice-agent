@@ -181,6 +181,12 @@ aside.margin cite {
 }
 .nav-links a:hover { color: var(--ink); background: var(--paper-2); }
 .nav-links a[aria-current="page"] { color: var(--ink); font-weight: 550; }
+
+/* `.nav-links a` outranks `.btn-primary` on specificity, which silently ate
+   the button's colour and padding. Restate them at matching specificity. */
+.nav-links a.btn { padding: 11px 20px; border-radius: var(--r); font-weight: 500; }
+.nav-links a.btn-primary { background: var(--ink); color: var(--paper); }
+.nav-links a.btn-primary:hover { background: var(--marine); color: #fff; }
 .nav-cta { margin-left: 14px; }
 
 .nav-toggle {
