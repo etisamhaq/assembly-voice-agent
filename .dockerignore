@@ -1,3 +1,8 @@
+# The image serves the Python app and its operator console only.
+# The marketing site deploys separately and must not enter the build context —
+# it carries ~400MB of node_modules and .next output.
+site/
+
 .venv/
 __pycache__/
 *.pyc
@@ -5,8 +10,11 @@ __pycache__/
 .git/
 .gitignore
 .env
+.env.example
 audit/
 tests/
+pytest.ini
 README.md
 run.sh
+render.yaml
 requirements-dev.txt

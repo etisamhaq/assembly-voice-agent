@@ -127,10 +127,3 @@ class LocalRedactor:
             for k, c in found.items()
         ]
         return out, redactions
-
-
-class NullRedactor:
-    """For tests that need to assert on raw text."""
-
-    def redact(self, text: str) -> tuple[str, list[Redaction]]:
-        return text, []

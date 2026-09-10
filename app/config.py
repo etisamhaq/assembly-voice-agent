@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .llm import DEFAULT_GATEWAY_MODEL, DEFAULT_GROQ_MODEL, DEFAULT_GROQ_ROOM_MODEL
+
 try:
     from dotenv import load_dotenv
 
@@ -45,17 +47,17 @@ class Settings:
     # so it can afford the stronger model, the room agent is heard aloud so it
     # takes the faster one.
     groq_judge_model: str = field(
-        default_factory=lambda: os.getenv("SC_GROQ_JUDGE_MODEL", "openai/gpt-oss-120b")
+        default_factory=lambda: os.getenv("SC_GROQ_JUDGE_MODEL", DEFAULT_GROQ_MODEL)
     )
     groq_room_model: str = field(
-        default_factory=lambda: os.getenv("SC_GROQ_ROOM_MODEL", "openai/gpt-oss-20b")
+        default_factory=lambda: os.getenv("SC_GROQ_ROOM_MODEL", DEFAULT_GROQ_ROOM_MODEL)
     )
 
     # Used when the gateway backend is active. The free-tier default is the
     # only model reachable without paid gateway access; set it to
     # claude-opus-5 once the AssemblyAI account has Claude entitlements.
     gateway_model: str = field(
-        default_factory=lambda: os.getenv("SC_GATEWAY_MODEL", "qwen3.5-4b-32k-fast")
+        default_factory=lambda: os.getenv("SC_GATEWAY_MODEL", DEFAULT_GATEWAY_MODEL)
     )
 
     judge_model: str = field(default_factory=lambda: os.getenv("SC_JUDGE_MODEL", "claude-opus-5"))
