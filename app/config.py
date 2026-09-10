@@ -62,6 +62,10 @@ class Settings:
     room_model: str = field(default_factory=lambda: os.getenv("SC_ROOM_MODEL", "claude-opus-5"))
     judge_effort: str = field(default_factory=lambda: os.getenv("SC_JUDGE_EFFORT", "low"))
 
+    # Comma-separated origins allowed to read the public API. The marketing
+    # site is served from a different host, so it needs this to read /api/health.
+    cors_origins: str = field(default_factory=lambda: os.getenv("SC_CORS_ORIGINS", "*"))
+
     source: str = field(default_factory=lambda: os.getenv("SC_SOURCE", "simulated"))
     max_speakers: int = field(default_factory=lambda: _int("SC_MAX_SPEAKERS", 3))
     silence_nudge_seconds: int = field(default_factory=lambda: _int("SC_SILENCE_NUDGE_SECONDS", 90))

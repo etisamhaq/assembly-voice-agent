@@ -9,6 +9,7 @@ from contextlib import suppress
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -32,6 +33,17 @@ logging.basicConfig(
 log = logging.getLogger("secondchair")
 
 app = FastAPI(title="Second Chair", version="1.0.0")
+
+# The marketing site reads /api/health from another origin to tell visitors
+# whether the container is awake. Read-only, no credentials, so a permissive
+# default is fine; pin SC_CORS_ORIGINS to lock it down.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
+    allow_credentials=False,
+    allow_methods=["GET", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 _rules = RuleEngine.from_path(settings.rules_path)
 # Probed once at import so /api/health can report the resolved wiring.

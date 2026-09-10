@@ -101,3 +101,22 @@ def test_whisper_precedes_its_turn_on_the_wire(client):
         e for e in events[idx_first_whisper:] if e["type"] == "turn.processed" and e["violations"]
     )
     assert following["violations"][0]["rule_id"] == events[idx_first_whisper]["rule_id"]
+
+
+def test_health_is_readable_cross_origin(client):
+    """The marketing site lives on another host and reads this endpoint."""
+    r = client.get("/api/health", headers={"Origin": "https://second-chair.vercel.app"})
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") in {"*", "https://second-chair.vercel.app"}
+
+
+def test_health_preflight_is_allowed(client):
+    r = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://second-chair.vercel.app",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert r.status_code in (200, 204)
+    assert "access-control-allow-origin" in r.headers
