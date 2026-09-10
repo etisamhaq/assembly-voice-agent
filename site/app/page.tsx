@@ -17,9 +17,9 @@ export default function Home() {
               other ninety percent of the conversation.
             </p>
             <div className="hero-actions">
-              <a className="btn btn-primary" href={DEMO_URL} target="_blank" rel="noreferrer">
-                Open the demo
-              </a>
+              <Link className="btn btn-primary" href={DEMO_URL}>
+                Run a call
+              </Link>
               <Link className="btn btn-ghost" href="/how-it-works">
                 See how it works
               </Link>

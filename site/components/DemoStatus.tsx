@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DEMO_URL } from "@/lib/content";
+import { API_URL } from "@/lib/content";
 
 type State = "checking" | "live" | "waking" | "down";
 
 const COPY: Record<State, string> = {
-  checking: "Checking the demo",
-  live: "Demo ready",
-  waking: "Waking the demo, about 40s",
-  down: "Demo unreachable",
+  checking: "Checking the backend",
+  live: "Backend ready",
+  waking: "Waking the backend, about 40s",
+  down: "Backend unreachable",
 };
 
 /**
@@ -26,7 +26,7 @@ export default function DemoStatus({ className = "" }: { className?: string }) {
     const ping = (ms: number) => {
       const ctl = new AbortController();
       const timer = setTimeout(() => ctl.abort(), ms);
-      return fetch(`${DEMO_URL}/api/health`, { signal: ctl.signal, cache: "no-store" })
+      return fetch(`${API_URL}/api/health`, { signal: ctl.signal, cache: "no-store" })
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
         .finally(() => clearTimeout(timer));
     };

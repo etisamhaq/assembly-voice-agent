@@ -23,7 +23,7 @@ export default function Footer() {
               <li><Link href="/features">Features</Link></li>
               <li><Link href="/how-it-works">How it works</Link></li>
               <li><Link href="/use-cases">Use cases</Link></li>
-              <li><a href={DEMO_URL} target="_blank" rel="noreferrer">Live demo</a></li>
+              <li><Link href={DEMO_URL}>Demo</Link></li>
             </ul>
           </div>
 

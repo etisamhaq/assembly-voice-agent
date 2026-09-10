@@ -1,0 +1,149 @@
+/* The console. Dark, because it is worn during a live call next to a client's
+   face — and because the room and the earpiece need to read as one instrument. */
+
+.demo { font-family: var(--sans); }
+
+/* ---------------------------------------------------------------- controls */
+
+.demo-controls {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;
+  padding-bottom: 18px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-size: var(--t-xs); color: var(--ink-mute); }
+.field select {
+  font-family: var(--sans); font-size: var(--t-sm);
+  background: var(--paper); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: var(--r);
+  padding: 9px 11px; min-width: 148px; cursor: pointer;
+}
+.field select:disabled { opacity: .5; cursor: not-allowed; }
+.demo-actions { margin-left: auto; display: flex; gap: 10px; }
+
+.demo-error {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  padding: 13px 16px; margin-bottom: 16px;
+  border: 1px solid color-mix(in srgb, var(--critical) 35%, var(--rule));
+  border-left: 3px solid var(--critical);
+  border-radius: var(--r);
+  background: color-mix(in srgb, var(--critical) 6%, var(--paper));
+}
+.demo-error strong { font-size: var(--t-sm); font-weight: 500; color: var(--ink); max-width: 62ch; }
+.demo-error .btn { margin-left: auto; }
+
+/* ----------------------------------------------------------------- console */
+
+.demo .console-body { display: grid; grid-template-columns: minmax(0,1fr) 320px; min-height: 460px; }
+.demo .console-room,
+.demo .console-whisper { padding: 16px 18px 22px; overflow-y: auto; max-height: 620px; }
+.demo .console-whisper { border-left: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.022); }
+
+.col-label {
+  font-size: var(--t-xs); color: #7f8c86; margin-bottom: 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.legend { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: 10.5px; }
+.legend .lg { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.legend .lg.critical { background: #d5564a; }
+.legend .lg.warning  { background: #e0a13c; }
+.legend .lg.coach    { background: #45c99b; }
+
+.bar-right { margin-left: auto; display: flex; gap: 8px; }
+.cap {
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14); color: #6f7c76;
+}
+.cap.on { color: #45c99b; border-color: rgba(69,201,155,.4); }
+
+/* ------------------------------------------------------------------- turns */
+
+.d-turn { margin-bottom: 14px; animation: enter .24s var(--ease) both; }
+.d-meta {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+  font-size: var(--t-xs); margin-bottom: 3px;
+}
+.d-meta .who { font-weight: 600; }
+.d-meta .t { color: #6f7c76; }
+.d-meta .tag { color: #7aa5f0; }
+.d-turn.role-advisor .who { color: #b6a5ee; }
+.d-turn.role-client  .who { color: #6fc9dd; }
+.d-turn.role-spouse  .who { color: #e8a2c2; }
+.d-turn.role-unknown .who { color: #97a29c; }
+
+.d-said {
+  font-size: var(--t-sm); line-height: 1.55; color: #cfd6d1;
+  border-left: 2px solid rgba(255,255,255,.13); padding-left: 11px;
+}
+.d-turn.flagged .d-said { border-left-color: #d5564a; }
+.d-turn.flagged-warning .d-said { border-left-color: #e0a13c; }
+.d-turn.partial .d-said { color: #7c8781; font-style: italic; }
+
+.d-said mark.hit {
+  background: rgba(213,86,74,.2); color: #ffb0a6;
+  border-bottom: 1px solid rgba(213,86,74,.55); border-radius: 2px; padding: 0 2px;
+}
+.d-said mark.hit.warning { background: rgba(224,161,60,.18); color: #ffd08a; border-bottom-color: rgba(224,161,60,.55); }
+.d-said mark.hit.coach   { background: rgba(69,201,155,.15); color: #93e9c9; border-bottom-color: rgba(69,201,155,.5); }
+
+.wdetail { font-size: var(--t-xs); color: #97a29c; margin-top: 3px; line-height: 1.5; }
+
+/* ----------------------------------------------------------- spoken aloud */
+
+.console-foot {
+  border-top: 1px solid rgba(255,255,255,.09);
+  background: rgba(122,165,240,.05);
+  padding: 14px 18px 16px;
+}
+.room-line { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.room-line:last-child { margin-bottom: 0; }
+.room-line .icon {
+  flex: none; width: 21px; height: 21px; border-radius: 50%;
+  background: rgba(122,165,240,.16); border: 1px solid rgba(122,165,240,.4);
+  display: grid; place-items: center; font-size: 9.5px; color: #7aa5f0; margin-top: 1px;
+}
+.room-line .txt { color: #cddcf5; font-size: var(--t-sm); line-height: 1.5; }
+.room-line .lat { margin-left: auto; flex: none; font-family: var(--mono); font-size: 10.5px; color: #6f7c76; }
+
+/* --------------------------------------------------------- session record */
+
+.record-card {
+  margin-top: 22px; padding: 16px 18px 15px;
+  border: 1px solid rgba(255,255,255,.12); border-radius: var(--r);
+  background: rgba(122,165,240,.05);
+  animation: enter .3s var(--ease) both;
+}
+.rc-head {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .13em;
+  text-transform: uppercase; color: #7aa5f0; margin-bottom: 12px;
+}
+.rc-grid { display: grid; gap: 1px; background: rgba(255,255,255,.07); border-radius: 5px; overflow: hidden; }
+.rc-row { display: flex; align-items: baseline; gap: 12px; padding: 8px 11px; background: #151c18; }
+.rc-row .k { font-size: 12.5px; color: #97a29c; }
+.rc-row .v { margin-left: auto; font-family: var(--mono); font-size: 13px; font-weight: 600; color: #e6eae2; }
+.rc-row .v.crit { color: #d5564a; }
+.rc-row .v.warn { color: #e0a13c; }
+.rc-row .v.ok   { color: #45c99b; }
+.rc-foot { margin-top: 11px; font-size: 11.5px; line-height: 1.5; color: #6f7c76; max-width: 60ch; }
+
+/* ------------------------------------------------------------------ stats */
+
+.demo-stats {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule);
+  border-top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); overflow: hidden; margin: 0;
+}
+.dstat { background: var(--paper); padding: 14px 16px; }
+.dstat dt { font-size: var(--t-xs); color: var(--ink-mute); margin-bottom: 4px; }
+.dstat dd { margin: 0; font-family: var(--mono); font-size: var(--t-md); font-weight: 500; color: var(--ink); }
+.dstat dd.crit { color: var(--critical); }
+.dstat dd.ok   { color: var(--coach); }
+
+@media (max-width: 880px) {
+  .demo .console-body { grid-template-columns: 1fr; min-height: 0; }
+  .demo .console-whisper { border-left: 0; border-top: 1px solid rgba(255,255,255,.09); }
+  .demo .console-room, .demo .console-whisper { max-height: none; }
+  .demo-stats { grid-template-columns: repeat(2, 1fr); }
+  .demo-actions { margin-left: 0; width: 100%; }
+  .demo-actions .btn { width: 100%; justify-content: center; }
+}

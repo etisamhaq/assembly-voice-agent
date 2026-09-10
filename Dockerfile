@@ -1,4 +1,6 @@
-# Second Chair - production image.
+# Second Chair API - production image.
+# Serves the speech pipeline and the session WebSocket. The web interface is
+# a separate deployment and is deliberately not in this image.
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -13,7 +15,6 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
-COPY web ./web
 COPY demo.py check_llm.py ./
 
 # Non-root, and an audit directory it can actually write to.

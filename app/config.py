@@ -15,7 +15,6 @@ except ImportError:  # dotenv is convenience only
     pass
 
 ROOT = Path(__file__).resolve().parent
-WEB_DIR = ROOT.parent / "web"
 
 
 def _int(name: str, default: int) -> int:

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DEMO_URL, REPO_URL } from "@/lib/content";
 import DemoStatus from "./DemoStatus";
 
@@ -15,9 +16,9 @@ export default function Cta({
           <h2>{title}</h2>
           <p>{body}</p>
           <div className="hero-actions">
-            <a className="btn btn-primary" href={DEMO_URL} target="_blank" rel="noreferrer">
-              Open the demo
-            </a>
+            <Link className="btn btn-primary" href={DEMO_URL}>
+              Run a call
+            </Link>
             <a className="btn btn-ghost" href={REPO_URL} target="_blank" rel="noreferrer">
               Read the source
             </a>

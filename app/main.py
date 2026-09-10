@@ -4,20 +4,20 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import uuid
 from contextlib import suppress
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 
 from .addressivity import AddressivityDetector
 from .audit import AuditLog
 from .channels import TTS, whisper_speech
 from .compliance import ComplianceEngine, RuleEngine
-from .config import WEB_DIR, settings
+from .config import settings
 from .engagement import EngagementMonitor
 from .factory import build_judge, build_room_agent
 from .models import Channel
@@ -32,7 +32,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("secondchair")
 
-app = FastAPI(title="Second Chair", version="1.0.0")
+SITE_URL = os.getenv("SC_SITE_URL", "https://second-chair-chi.vercel.app")
+
+app = FastAPI(
+    title="Second Chair API",
+    version="1.0.0",
+    description="Speech pipeline and session WebSocket. The interface deploys separately.",
+)
 
 # The marketing site reads /api/health from another origin to tell visitors
 # whether the container is awake. Read-only, no credentials, so a permissive
@@ -224,9 +230,18 @@ async def session_socket(ws: WebSocket) -> None:
 
 
 @app.get("/")
-async def index() -> FileResponse:
-    return FileResponse(WEB_DIR / "index.html")
-
-
-if WEB_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(WEB_DIR)), name="static")
+async def root() -> JSONResponse:
+    """This service is the backend. The interface is a separate deployment."""
+    return JSONResponse(
+        {
+            "service": "second-chair",
+            "role": "api",
+            "interface": SITE_URL,
+            "endpoints": {
+                "health": "/api/health",
+                "rules": "/api/rules",
+                "script": "/api/script",
+                "session": "/ws/session",
+            },
+        }
+    )

@@ -57,8 +57,8 @@ Two deployments, on purpose:
 
 | What | Where | Why |
 |---|---|---|
-| The app (`app/`, `web/`) | Render, one Docker container | Holds session state in memory and keeps a WebSocket open for the length of a call — it needs an always-on container |
-| The marketing site (`site/`) | Vercel, Next.js static | Seven prerendered pages, no server needed |
+| The API (`app/`) | Render, one Docker container | Holds session state in memory and keeps a WebSocket open for the length of a call — it needs an always-on container. It serves no pages. |
+| Everything a person sees (`site/`) | Vercel, Next.js | The marketing pages *and* the live demo console, which talks to the API over a cross-origin WebSocket |
 
 The site reads the app's `/api/health` cross-origin to tell visitors whether the demo container
 is awake before they click, which is why the app sets `SC_CORS_ORIGINS` (default `*`, read-only).
@@ -248,7 +248,7 @@ app/
   sources/      transcript sources — assemblyai.py (live) | simulated.py (scripted)
   rules/        finra.yaml — the deterministic rule pack
   scripts/      advisory_call.json — the demo call
-  llm.py        backend interface — gateway | anthropic | none
+  llm.py        LLM interface — groq | gateway | anthropic | none
   factory.py    wiring shared by the server and the demo
   guardrails.py redaction (runs first, always)
   compliance.py rule engine + Claude judge
@@ -258,8 +258,9 @@ app/
   pipeline.py      the orchestrator
   audit.py         append-only, PII-free session record
   main.py          FastAPI + WebSocket
-web/            the operator console
-site/           the marketing site (Next.js, deployed separately)
+site/           everything with a UI (Next.js) — pages plus the demo console
+  app/demo/       the live console route
+  components/demo/  session socket, audio channels, console UI
 tests/          132 tests
 ```
 

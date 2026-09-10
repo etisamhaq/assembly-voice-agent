@@ -55,9 +55,9 @@ export default function Nav() {
             </Link>
           ))}
           <DemoStatus />
-          <a className="btn btn-primary nav-cta" href={DEMO_URL} target="_blank" rel="noreferrer">
-            Open the demo
-          </a>
+          <Link className="btn btn-primary nav-cta" href={DEMO_URL}>
+            Run a call
+          </Link>
         </nav>
       </div>
     </header>

@@ -40,15 +40,19 @@ def test_script_endpoint(client):
     assert len(body["script"]["turns"]) == 20
 
 
-def test_index_serves_the_console(client):
+def test_root_describes_the_api(client):
+    """This service serves no pages - the interface deploys separately."""
     r = client.get("/")
     assert r.status_code == 200
-    assert "Second Chair" in r.text
+    body = r.json()
+    assert body["role"] == "api"
+    assert body["interface"].startswith("http")
+    assert set(body["endpoints"]) == {"health", "rules", "script", "session"}
 
 
-def test_static_assets(client):
-    assert client.get("/static/app.js").status_code == 200
-    assert client.get("/static/styles.css").status_code == 200
+def test_no_static_interface_is_served(client):
+    assert client.get("/static/app.js").status_code == 404
+    assert client.get("/index.html").status_code == 404
 
 
 def test_websocket_session_streams_a_full_call(client):

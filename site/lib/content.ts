@@ -1,8 +1,15 @@
 export const SITE_URL = "https://second-chair-chi.vercel.app";
-export const DEMO_URL = "https://second-chair-toe5.onrender.com";
+
+/** The backend: API and the session WebSocket. It serves no pages. */
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://second-chair-toe5.onrender.com";
+
+/** The demo runs here, on this site. */
+export const DEMO_URL = "/demo";
 export const REPO_URL = "https://github.com/etisamhaq/assembly-voice-agent";
 
 export const nav = [
+  { href: "/demo", label: "Demo" },
   { href: "/features", label: "Features" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/use-cases", label: "Use cases" },
