@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { SITE_URL } from "@/lib/content";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -27,7 +28,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://second-chair.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Second Chair — the voice agent built for three people in the room",
     template: "%s — Second Chair",
