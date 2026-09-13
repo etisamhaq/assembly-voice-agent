@@ -34,9 +34,9 @@ A financial advisor is on a call with a client and their spouse about a 401(k) r
 |---|---|---|
 | Three people talking | live speaker-attributed transcript | AssemblyAI streaming diarization |
 | Client reads out an SSN | redacted before it is stored or sent anywhere | `guardrails.py` |
-| Advisor says *"guaranteed to return eight percent"* | 🔴 whisper in **0 ms**: *"'Guaranteed' is a FINRA 2210 violation — say 'historically averaged'"* | rule engine |
-| Advisor implies a recommendation with no risk disclosure | ⚠️ whisper a beat later | Claude judge |
-| Spouse goes quiet for 94 s | 🟢 whisper: *"Spouse has been silent — bring them in"* | engagement monitor |
+| Advisor says *"guaranteed to return eight percent"* | whisper in **0 ms**: *"'Guaranteed' is a FINRA 2210 violation — say 'historically averaged'"* | rule engine |
+| Advisor implies a recommendation with no risk disclosure | whisper a beat later | Claude judge |
+| Spouse goes quiet for 94 s | whisper: *"Spouse has been silent — bring them in"* | engagement monitor |
 | *"Second Chair, what's their allocation?"* | **speaks aloud** to the room | addressivity + Claude |
 | 18 of 20 turns | **says nothing at all** | addressivity |
 | Call ends | FINRA-clean, PII-free, speaker-attributed audit log | `audit.py` |
