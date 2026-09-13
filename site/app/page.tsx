@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEMO_URL, figures, useCases } from "@/lib/content";
+import { DEMO_URL, figures, setups, useCases } from "@/lib/content";
 import HeroTranscript from "@/components/HeroTranscript";
 import DemoStatus from "@/components/DemoStatus";
 import Cta from "@/components/Cta";
@@ -66,6 +66,40 @@ export default function Home() {
       <section>
         <div className="wrap record">
           <div className="col-main stack">
+            <h2>In plain terms</h2>
+            <p className="plain">
+              An adviser is sitting with a couple, talking through a retirement plan. He says
+              &ldquo;this one is guaranteed to return eight percent.&rdquo; He didn&rsquo;t mean
+              anything by it. It slipped out.
+            </p>
+            <p className="plain">
+              That sentence breaks a rule, and nobody in the room notices. Six weeks later a
+              compliance officer finds it in a transcript, and the firm has a problem that costs
+              real money.
+            </p>
+            <p className="plain">
+              Second Chair tells him the second he says it, in his earpiece, where only he can
+              hear it &mdash; along with the words to put it right. He corrects himself in the
+              same breath. The problem never exists.
+            </p>
+          </div>
+          <aside className="margin">
+            <h4>Two more things it does</h4>
+            <p>
+              <strong>It keeps quiet.</strong> It only speaks out loud when someone says its name,
+              so it never interrupts the meeting.
+            </p>
+            <p>
+              <strong>It hides private details.</strong> If a client reads out an account number,
+              it is erased before it is saved anywhere.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section>
+        <div className="wrap record">
+          <div className="col-main stack">
             <h2>A room is not a headset</h2>
             <p>
               Drop a conventional voice agent into a meeting with three people and it fails in
@@ -124,6 +158,28 @@ export default function Home() {
                 in the third person as conversation, not a summons.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="wrap stack-lg">
+          <div className="head-block">
+            <h2>Three ways to run it</h2>
+            <p className="lede">
+              The earpiece is the version people remember, but it is not the only one. Pick
+              whichever matches where your conversations already happen.
+            </p>
+          </div>
+
+          <div className="setups">
+            {setups.map((s) => (
+              <article className="setup" key={s.name}>
+                <h3>{s.name}</h3>
+                <p className="effort">{s.effort}</p>
+                <p>{s.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

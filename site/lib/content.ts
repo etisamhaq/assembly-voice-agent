@@ -255,3 +255,52 @@ export const specs: [string, string][] = [
   ["Audit record", "Append-only JSONL, speaker-attributed, PII-free, regulation cited"],
   ["Test coverage", "130 automated tests, no network calls required"],
 ];
+
+/* --------------------------------------------------------------- setups */
+
+export const setups = [
+  {
+    name: "On a video call",
+    effort: "Nothing to install",
+    body: "Second Chair sits in a browser tab next to Zoom, Teams or Meet. Warnings appear on screen instead of in an earpiece, so there is no hardware and nothing for the client to notice. Most regulated advice happens here now, and this is the fastest way to start.",
+  },
+  {
+    name: "On the phone",
+    effort: "Connects to your telephony",
+    body: "Audio comes from the phone system you already use. Warnings land in the same screen the agent is already looking at. This is where call volume is highest — claims lines, advice desks, contact centres.",
+  },
+  {
+    name: "In the room",
+    effort: "A laptop and one earbud",
+    body: "For meetings that happen face to face. A laptop or tablet on the table picks up the room, and the professional wears a single wireless earbud. Nobody else hears a thing. This is the version nothing else on the market does.",
+  },
+];
+
+/* --------------------------------------------------------------- roadmap */
+
+export const roadmap = [
+  {
+    title: "A view for the person who signs off",
+    body: "Today the advisor sees their own call. Compliance leads need their own screen: what is trending across the team, who needs coaching, and an export they can hand an auditor.",
+  },
+  {
+    title: "Rule packs you can edit without an engineer",
+    body: "Rules are already a plain configuration file rather than code. The next step is editing and testing them in the browser, with separate packs per jurisdiction, product line and team.",
+  },
+  {
+    title: "Your client records, not a placeholder",
+    body: "When the agent is asked a question out loud it answers from a record. Connecting that to the CRM you already keep — Salesforce, Redtail, Wealthbox — makes the answers real.",
+  },
+  {
+    title: "Review of calls that already happened",
+    body: "The same engine can read yesterday's recordings instead of today's conversation. Teams that sample a small share of calls by hand could cover all of them.",
+  },
+  {
+    title: "Cleaner audio, cleaner separation",
+    body: "One shared microphone works. Giving each person their own channel removes the guesswork from deciding who spoke, which every later stage depends on.",
+  },
+  {
+    title: "The paperwork a regulated buyer needs",
+    body: "Recording consent built into the flow, a retention policy you control, and the security certification every compliance team asks for before signing anything.",
+  },
+];

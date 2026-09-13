@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { REPO_URL } from "@/lib/content";
+import { REPO_URL, roadmap } from "@/lib/content";
 import Cta from "@/components/Cta";
 
 export const metadata: Metadata = {
@@ -91,6 +91,30 @@ export default function About() {
               </a>
             </p>
           </aside>
+        </div>
+      </section>
+
+      <section>
+        <div className="wrap stack-lg">
+          <div className="head-block">
+            <h2>What we are building next</h2>
+            <p className="lede">
+              What exists today catches the mistake and keeps the record. These are the pieces that
+              turn it into something a compliance team can run across a whole firm.
+            </p>
+          </div>
+
+          <ul className="rulelist">
+            {roadmap.map((r) => (
+              <li key={r.title}>
+                <span className="idx" aria-hidden="true">&middot;</span>
+                <div>
+                  <h3>{r.title}</h3>
+                  <p>{r.body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
