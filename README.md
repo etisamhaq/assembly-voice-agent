@@ -2,13 +2,7 @@
 
 **The AI that sits in the room with you — and knows when to whisper and when to speak.**
 
-Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon).
-
 **Website → https://second-chair-chi.vercel.app**
-**Live demo → https://second-chair-toe5.onrender.com**  ·  press *Start call*
-
-> Hosted on Render's free plan, which sleeps after ~15 minutes idle. The first
-> request may take 30–60s to wake the container; everything after that is instant.
 
 ---
 
