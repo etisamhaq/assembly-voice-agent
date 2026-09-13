@@ -505,3 +505,18 @@ footer.site { border-top: 1px solid var(--rule); padding-block: 48px 40px; font-
 .setup p { font-family: var(--sans); font-size: var(--t-sm); color: var(--ink-soft); line-height: 1.6; }
 
 @media (max-width: 880px) { .setups { grid-template-columns: 1fr; } }
+
+/* Status on a setup card. Only one of these ships today, and the card says so
+   rather than letting the reader assume all three do. */
+.setup { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+.setup-status {
+  font-family: var(--sans); font-size: var(--t-xs); font-weight: 550;
+  padding: 3px 9px; border-radius: 999px; margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+.setup-status.now {
+  color: var(--coach);
+  background: color-mix(in srgb, var(--coach) 9%, transparent);
+  border-color: color-mix(in srgb, var(--coach) 28%, transparent);
+}
+.setup-status.later { color: var(--ink-mute); border-color: var(--rule); }

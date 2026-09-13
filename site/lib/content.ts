@@ -260,19 +260,22 @@ export const specs: [string, string][] = [
 
 export const setups = [
   {
+    name: "In the room",
+    status: "Available now" as const,
+    effort: "A laptop and one earbud",
+    body: "For meetings that happen face to face. A laptop or tablet on the table picks up the room, and the professional wears a single wireless earbud. The warning is panned to that ear alone, so nobody else hears a thing. This is the setup the demo runs today.",
+  },
+  {
     name: "On a video call",
-    effort: "Nothing to install",
-    body: "Second Chair sits in a browser tab next to Zoom, Teams or Meet. Warnings appear on screen instead of in an earpiece, so there is no hardware and nothing for the client to notice. Most regulated advice happens here now, and this is the fastest way to start.",
+    status: "In development" as const,
+    effort: "Nothing to install, once it ships",
+    body: "Second Chair alongside Zoom, Teams or Meet, taking the call audio directly and putting warnings on screen instead of in an earpiece. No hardware, nothing for the client to notice. Most regulated advice happens here now, so this is what we are building next.",
   },
   {
     name: "On the phone",
+    status: "Planned" as const,
     effort: "Connects to your telephony",
-    body: "Audio comes from the phone system you already use. Warnings land in the same screen the agent is already looking at. This is where call volume is highest — claims lines, advice desks, contact centres.",
-  },
-  {
-    name: "In the room",
-    effort: "A laptop and one earbud",
-    body: "For meetings that happen face to face. A laptop or tablet on the table picks up the room, and the professional wears a single wireless earbud. Nobody else hears a thing. This is the version nothing else on the market does.",
+    body: "Audio from the phone system you already run, with warnings in the screen the agent is already watching. This is where call volume is highest — claims lines, advice desks, contact centres — and where the integration work is heaviest.",
   },
 ];
 

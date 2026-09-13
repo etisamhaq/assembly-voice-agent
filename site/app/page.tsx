@@ -167,14 +167,17 @@ export default function Home() {
           <div className="head-block">
             <h2>Three ways to run it</h2>
             <p className="lede">
-              The earpiece is the version people remember, but it is not the only one. Pick
-              whichever matches where your conversations already happen.
+              The earpiece is the version people remember, and it is the one running today. Two
+              more are on the way, for the places most regulated conversations actually happen.
             </p>
           </div>
 
           <div className="setups">
             {setups.map((s) => (
               <article className="setup" key={s.name}>
+                <span className={`setup-status ${s.status === "Available now" ? "now" : "later"}`}>
+                  {s.status}
+                </span>
                 <h3>{s.name}</h3>
                 <p className="effort">{s.effort}</p>
                 <p>{s.body}</p>
